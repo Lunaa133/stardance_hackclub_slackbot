@@ -8,20 +8,54 @@ const app = new App({
   socketMode: true
 });
 
+const fs = require('fs');
+const path = require('path');
+
+//hack-daily updated
 app.command("/lilshark-hack_daily", async ({ command, ack, respond }) => {
   await ack();
 
   const user = command.user_name;
-  const extraText = command.text;
+  const extraText = command.text ? command.text.trim() : "";
 
-  if (extraText) {
-    await respond({ text: `Hey @${user}, you said: "${extraText}". The little shark is analyzing your text... 🦈` });
-  } else {
-    await respond({ text: `Hey @${user}! You didn't add any notes to your daily hack check-in. Try adding some text next time!` });
+  //if missing input
+  if (!extraText) {
+    await respond({
+      response_type: "ephemeral",
+      text: `Heyy @${user}! You didn't add any progress notes:) Try running:\n\`\`\`/lilshark-hack_daily Worked on (write what you've worked on here).\`\`\``
+    });
+    return;
   }
+
+  //save progress to a local JSON
+  const logEntry = {
+    user: user,
+    note: extraText,
+    timestamp: new Date().toISOString()
+  };
+
+  const filePath = path.join(__dirname, 'daily_logs.json');
+  let logs = [];
+
+  try {
+    if (fs.existsSync(filePath)) {
+      const fileData = fs.readFileSync(filePath, 'utf8');
+      logs = fileData ? JSON.parse(fileData) : [];
+    }
+    logs.push(logEntry);
+    fs.writeFileSync(filePath, JSON.stringify(logs, null, 2));
+  } catch (error) {
+    console.error("Error saving daily log:", error);
+  }
+
+  //confirmation message
+  await respond({
+    response_type: "ephemeral",
+    text: `🦈 *Daily Hackathon Log Recorded!*\n*Developer:* @${user}\n> "${extraText}"\n\n_The little shark has logged your progress! Keep building!_ 🚀`
+  });
 });
 
-// --- UPDATED HELP MENU ---
+// --- help ---
 app.command("/lilshark-help", async ({ ack, respond }) => {
   await ack();
   await respond({
@@ -76,8 +110,12 @@ app.command("/lilshark-space", async ({ ack, respond }) => {
   }
 });
 
-// --- START APP!! ---
+//start it
 (async () => {
-  await app.start();
-  console.log("bot is running with custom commands!");
+  try {
+    await app.start();
+    console.log("🦈 LilShark bot is active and listening via Socket Mode!");
+  } catch (error) {
+    console.error("Failed to start LilShark bot:", error);
+  }
 })();
