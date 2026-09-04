@@ -44,7 +44,7 @@ node index.js
 - /lilshark-ocean: gives random marine fact
 - /lilshark-space: gives ISS telemetry live (location, altitude and velocity)
 - /lilshark-help: shows you the commands available
-- /lilshark-hack_daily: sends reminder message to remind people to code
+- /lilshark-hack_daily: sends reminder message to remind the channel/chat to code
 
   ---
 made by: [kingkev](https://stardance.hackclub.com/@kingkev) for hackclub stardance
