@@ -44,7 +44,7 @@ node index.js
 - /lilshark-ocean: gives random marine fact
 - /lilshark-space: gives ISS telemetry live (location, altitude and velocity)
 - /lilshark-help: shows you the commands available
-- /lilshark-hack_daily: daily coding, kind of a reminder and also you can log something about your progress but it would return the same answer each time when you do write something
+- /lilshark-hack_daily: sends reminder message to remind people to code
 
   ---
 made by: [kingkev](https://stardance.hackclub.com/@kingkev) for hackclub stardance
