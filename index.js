@@ -8,53 +8,32 @@ const app = new App({
   socketMode: true
 });
 
-const fs = require('fs');
-const path = require('path');
 
 //hack-daily updated
-app.command("/lilshark-hack_daily", async ({ command, ack, respond }) => {
+app.command("/lilshark-hack_daily", async ({ command, ack, respond, client }) => {
   await ack();
 
-  const user = command.user_name;
+  const user = command.user_id;
   const extraText = command.text ? command.text.trim() : "";
 
-  //if missing input
-  if (!extraText) {
+  // Draft the message text
+  const reminderMessage = extraText
+    ? `daily reminder for you to codee YEYYY: ${extraText}`
+    : "daily reminder for you to codee YEYYY!";
+  try {
+    // Post directly to the public channel
+    await client.chat.postMessage({
+      channel: command.channel_id,
+      text: reminderMessage
+    });
+  } catch (error) {
+    console.error("Error sending daily reminder:", error);
     await respond({
       response_type: "ephemeral",
-      text: `Heyy @${user}! You didn't add any progress notes:) Try running:\n\`\`\`/lilshark-hack_daily Worked on (write what you've worked on here).\`\`\``
+      text: "⚠️ Couldn't post the reminder to this channel. Make sure LilShark has permission to speak here!"
     });
-    return;
   }
-
-  //save progress to a local JSON
-  const logEntry = {
-    user: user,
-    note: extraText,
-    timestamp: new Date().toISOString()
-  };
-
-  const filePath = path.join(__dirname, 'daily_logs.json');
-  let logs = [];
-
-  try {
-    if (fs.existsSync(filePath)) {
-      const fileData = fs.readFileSync(filePath, 'utf8');
-      logs = fileData ? JSON.parse(fileData) : [];
-    }
-    logs.push(logEntry);
-    fs.writeFileSync(filePath, JSON.stringify(logs, null, 2));
-  } catch (error) {
-    console.error("Error saving daily log:", error);
-  }
-
-  //confirmation message
-  await respond({
-    response_type: "ephemeral",
-    text: `🦈 *Daily Hackathon Log Recorded!*\n*Developer:* @${user}\n> "${extraText}"\n\n_The little shark has logged your progress! Keep building!_ 🚀`
-  });
 });
-
 // --- help ---
 app.command("/lilshark-help", async ({ ack, respond }) => {
   await ack();
